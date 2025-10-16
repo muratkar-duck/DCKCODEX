@@ -4,24 +4,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import type { Tables } from "@/types";
 
+type ScriptPreview = Pick<Tables<"scripts">, "id" | "title" | "genre" | "synopsis" | "price_cents">;
+type ListingPreview = Pick<Tables<"producer_listings">, "id" | "title" | "description" | "genre" | "budget_cents" | "deadline">;
+
 async function getBrowseData() {
   const supabase = createSupabaseServerClient();
   if (!supabase) {
-    return { sessionRole: null, scripts: [], listings: [] as Tables<"producer_listings">[] };
+    return { sessionRole: null, scripts: [] as ScriptPreview[], listings: [] as ListingPreview[] };
   }
 
   const session = await supabase.auth.getSession();
   const role = session.data.session?.user.user_metadata.role ?? null;
 
-  const { data: scripts = [] } = await supabase
+  const { data: scriptData } = await supabase
     .from("scripts")
     .select("id, title, genre, synopsis, price_cents")
     .limit(6);
 
-  const { data: listings = [] } = await supabase
+  const { data: listingData } = await supabase
     .from("producer_listings")
     .select("id, title, description, genre, budget_cents, deadline")
     .limit(6);
+
+  const scripts: ScriptPreview[] = (scriptData ?? []) as ScriptPreview[];
+  const listings: ListingPreview[] = (listingData ?? []) as ListingPreview[];
 
   return { sessionRole: role as string | null, scripts, listings };
 }
