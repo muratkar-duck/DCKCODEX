@@ -8,6 +8,10 @@ import { TabTitleHandler } from "@/components/common/tab-title-handler";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -24,27 +28,37 @@ export const metadata: Metadata = {
     "Yazarlar ve yapımcılar için güvenli, şeffaf ve hızlı senaryo pazaryeri. Senaryoları keşfedin, ilan açın, başvurularınızı yönetin.",
 };
 
-async function resolveInitialSession() {
-  const supabase = createSupabaseServerClient();
-  if (!supabase) {
-    return { session: null, profile: null as Tables<"users"> | null };
+type InitialSessionResult = {
+  session: Parameters<typeof Providers>[0]["initialSession"];
+  profile: Tables<"users"> | null;
+};
+
+async function resolveInitialSession(): Promise<InitialSessionResult> {
+  try {
+    const supabase = createSupabaseServerClient();
+    if (!supabase) {
+      return { session: null, profile: null };
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.user) {
+      return { session: null, profile: null };
+    }
+
+    const { data: profile } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", session.user.id)
+      .maybeSingle();
+
+    return { session, profile: profile ?? null };
+  } catch (error) {
+    console.error("Failed to resolve initial Supabase session", error);
+    return { session: null, profile: null };
   }
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session?.user) {
-    return { session: null, profile: null as Tables<"users"> | null };
-  }
-
-  const { data: profile } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", session.user.id)
-    .maybeSingle();
-
-  return { session, profile: profile ?? null };
 }
 
 export default async function RootLayout({
