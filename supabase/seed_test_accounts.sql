@@ -93,7 +93,7 @@ with input_users(role, email) as (
     ('producer', 'yapimci1@ducktylo.com'),
     ('producer', 'yapimci2@ducktylo.com')
 ),
-current_timestamp as (
+timestamp_cte as (
   select now() as ts
 )
 insert into public.users (id, email, role, created_at, updated_at)
@@ -101,11 +101,11 @@ select
   au.id,
   au.email,
   iu.role,
-  ct.ts,
-  ct.ts
+  tc.ts,
+  tc.ts
 from auth.users au
 join input_users iu on lower(au.email) = lower(iu.email)
-cross join current_timestamp ct
+cross join timestamp_cte tc
 on conflict (id) do update
   set email = excluded.email,
       role = excluded.role,
