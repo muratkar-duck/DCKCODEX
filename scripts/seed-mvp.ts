@@ -21,7 +21,12 @@ async function upsertUser(email: string, role: "writer" | "producer") {
     .maybeSingle();
 
   if (data) {
-    await supabase.from("users").update({ role }).eq("id", data.id);
+    const profile: TablesInsert<"users"> = {
+      id: data.id,
+      email,
+      role,
+    };
+    await supabase.from("users").upsert(profile);
     return data.id;
   }
 
