@@ -13,14 +13,20 @@ npm install
 
 ## Gerekli ortam değişkenleri
 
-Aşağıdaki değişkenleri `.env.local` dosyasına ekleyin:
+1. Örnek dosyayı kopyalayın:
 
-```
-NEXT_PUBLIC_SUPABASE_URL="https://<project>.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="<anon-key>"
-SUPABASE_SERVICE_ROLE_KEY="<service-role-key>"
-SUPABASE_URL="https://<project>.supabase.co"
-```
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Supabase kontrol panelinden aşağıdaki değerleri doldurun:
+
+   - **NEXT_PUBLIC_SUPABASE_URL** – Project Settings → API → Project URL
+   - **NEXT_PUBLIC_SUPABASE_ANON_KEY** – Project Settings → API → `anon` public API key
+   - **SUPABASE_SERVICE_ROLE_KEY** *(opsiyonel)* – Seed scriptleri ve yönetici işlemleri için Project Settings → API → `service_role` secret
+   - **SUPABASE_URL** – Çoğu durumda Project URL ile aynı değeri kullanın
+
+> Not: Seed scriptini çalıştırarak demo verileri yüklemek istiyorsanız servis rol anahtarının tanımlı olması gerekir.
 
 ## Geliştirme
 

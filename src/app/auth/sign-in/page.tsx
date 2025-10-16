@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getBrowserClient } from "@/lib/supabase/client";
+import { SUPABASE_CONFIG_MISSING_MESSAGE } from "@/lib/supabase/messages";
 import toast from "react-hot-toast";
 
 const schema = z.object({
@@ -24,7 +25,7 @@ export default function SignInPage() {
 
   async function onSubmit(values: z.infer<typeof schema>) {
     if (!supabase) {
-      toast.error("Supabase yapılandırması eksik.");
+      toast.error(SUPABASE_CONFIG_MISSING_MESSAGE);
       return;
     }
 

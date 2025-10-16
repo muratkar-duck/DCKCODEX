@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { getBrowserClient } from "@/lib/supabase/client";
+import { SUPABASE_CONFIG_MISSING_MESSAGE } from "@/lib/supabase/messages";
 
 const schema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
@@ -21,7 +22,7 @@ export default function ResetPasswordPage() {
 
   async function onSubmit(values: z.infer<typeof schema>) {
     if (!supabase) {
-      toast.error("Supabase yapılandırması eksik.");
+      toast.error(SUPABASE_CONFIG_MISSING_MESSAGE);
       return;
     }
 
