@@ -43,7 +43,7 @@ upserted_auth as (
     jsonb_build_object('provider', 'email', 'providers', array['email']),
     jsonb_build_object('role', u.role)
   from input_users u
-  on conflict on constraint users_email_key do update
+  on conflict (email) do update
     set encrypted_password = excluded.encrypted_password,
         email_confirmed_at = excluded.email_confirmed_at,
         updated_at = now(),
@@ -92,15 +92,21 @@ with input_users(role, email) as (
     ('writer', 'senarist5@ducktylo.com'),
     ('producer', 'yapimci1@ducktylo.com'),
     ('producer', 'yapimci2@ducktylo.com')
+),
+current_timestamp as (
+  select now() as ts
 )
-insert into public.users (id, email, role)
+insert into public.users (id, email, role, created_at, updated_at)
 select
   au.id,
   au.email,
-  iu.role
+  iu.role,
+  ct.ts,
+  ct.ts
 from auth.users au
 join input_users iu on lower(au.email) = lower(iu.email)
+cross join current_timestamp ct
 on conflict (id) do update
   set email = excluded.email,
       role = excluded.role,
-      updated_at = now();
+      updated_at = excluded.updated_at;
