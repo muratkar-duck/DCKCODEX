@@ -28,6 +28,10 @@ SUPABASE_URL="https://<project>.supabase.co"
 npm run dev
 ```
 
+### Vercel
+
+Depo kökünde yer alan `vercel.json`, projeyi her zaman Next.js yapımcısı (`@vercel/next`) ile derlemeye zorlar. Vercel kontrol panelinde daha önce statik dağıtım için `public` klasörünü hedef gösterdiyseniz bu ayarlar kendi kendine uygulanır ve 404 hatası engellenir. Herhangi bir özel çıkış dizini tanımladıysanız kaldırmayı unutmayın.
+
 ## Kalite kontrolleri
 
 ```bash
