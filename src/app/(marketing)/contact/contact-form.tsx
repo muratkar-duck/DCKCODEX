@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { getBrowserClient } from "@/lib/supabase/client";
+import { SUPABASE_CONFIG_MISSING_MESSAGE } from "@/lib/supabase/messages";
 import type { TablesInsert } from "@/types";
 
 const schema = z.object({
@@ -29,7 +30,7 @@ export function ContactForm() {
 
   async function onSubmit(values: z.infer<typeof schema>) {
     if (!supabase) {
-      toast.error("Supabase bağlantısı yapılandırılmamış.");
+      toast.error(SUPABASE_CONFIG_MISSING_MESSAGE);
       return;
     }
 
