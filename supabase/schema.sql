@@ -299,5 +299,5 @@ create policy "Messages restricted" on public.messages
   ) with check (sender_id = auth.uid());
 
 create policy "Support messages" on public.support_messages
-  for insert with check (true)
-  using (false);
+  for insert
+  with check (true);
