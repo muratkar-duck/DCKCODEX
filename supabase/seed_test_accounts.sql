@@ -17,15 +17,22 @@ with input_users(role, email) as (
 existing_auth as (
   select distinct on (lower(u.email))
     u.id,
-    u.email
+    u.email,
+    u.instance_id
   from auth.users u
   join input_users iu on lower(u.email) = lower(iu.email)
   order by lower(u.email), u.created_at desc
 ),
+project_instance as (
+  select id
+  from auth.instances
+  order by created_at desc
+  limit 1
+),
 prepared_auth as (
   select
     coalesce(ea.id, gen_random_uuid()) as id,
-    '00000000-0000-0000-0000-000000000000' as instance_id,
+    coalesce(ea.instance_id, pi.id, '00000000-0000-0000-0000-000000000000'::uuid) as instance_id,
     'authenticated' as aud,
     'authenticated' as role,
     iu.email,
@@ -38,6 +45,7 @@ prepared_auth as (
     jsonb_build_object('role', iu.role) as raw_user_meta_data
   from input_users iu
   left join existing_auth ea on lower(ea.email) = lower(iu.email)
+  left join project_instance pi on true
 ),
 upserted_auth as (
   insert into auth.users (
