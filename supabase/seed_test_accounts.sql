@@ -14,6 +14,31 @@ with input_users(role, email) as (
     ('producer', 'yapimci1@ducktylo.com'),
     ('producer', 'yapimci2@ducktylo.com')
 ),
+existing_auth as (
+  select distinct on (lower(u.email))
+    u.id,
+    u.email
+  from auth.users u
+  join input_users iu on lower(u.email) = lower(iu.email)
+  order by lower(u.email), u.created_at desc
+),
+prepared_auth as (
+  select
+    coalesce(ea.id, gen_random_uuid()) as id,
+    '00000000-0000-0000-0000-000000000000' as instance_id,
+    'authenticated' as aud,
+    'authenticated' as role,
+    iu.email,
+    crypt('123456', gen_salt('bf')) as encrypted_password,
+    now() as email_confirmed_at,
+    now() as created_at,
+    now() as updated_at,
+    now() as last_sign_in_at,
+    jsonb_build_object('provider', 'email', 'providers', array['email']) as raw_app_meta_data,
+    jsonb_build_object('role', iu.role) as raw_user_meta_data
+  from input_users iu
+  left join existing_auth ea on lower(ea.email) = lower(iu.email)
+),
 upserted_auth as (
   insert into auth.users (
     id,
@@ -30,24 +55,29 @@ upserted_auth as (
     raw_user_meta_data
   )
   select
-    gen_random_uuid(),
-    '00000000-0000-0000-0000-000000000000',
-    'authenticated',
-    'authenticated',
-    u.email,
-    crypt('123456', gen_salt('bf')),
-    now(),
-    now(),
-    now(),
-    now(),
-    jsonb_build_object('provider', 'email', 'providers', array['email']),
-    jsonb_build_object('role', u.role)
-  from input_users u
-  on conflict (email) do update
-    set encrypted_password = excluded.encrypted_password,
+    id,
+    instance_id,
+    aud,
+    role,
+    email,
+    encrypted_password,
+    email_confirmed_at,
+    created_at,
+    updated_at,
+    last_sign_in_at,
+    raw_app_meta_data,
+    raw_user_meta_data
+  from prepared_auth
+  on conflict (id) do update
+    set email = excluded.email,
+        encrypted_password = excluded.encrypted_password,
         email_confirmed_at = excluded.email_confirmed_at,
+        instance_id = excluded.instance_id,
+        aud = excluded.aud,
+        role = excluded.role,
         updated_at = now(),
-        last_sign_in_at = now(),
+        last_sign_in_at = excluded.last_sign_in_at,
+        raw_app_meta_data = excluded.raw_app_meta_data,
         raw_user_meta_data = excluded.raw_user_meta_data
   returning id, email
 )
