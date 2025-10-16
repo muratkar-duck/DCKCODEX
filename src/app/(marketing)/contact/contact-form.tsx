@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { getBrowserClient } from "@/lib/supabase/client";
+import type { TablesInsert } from "@/types";
 
 const schema = z.object({
   name: z.string().min(2, "Adınız en az 2 karakter olmalı"),
@@ -32,7 +33,11 @@ export function ContactForm() {
       return;
     }
 
-    const { error } = await supabase.from("support_messages").upsert(values);
+    const payload: TablesInsert<"support_messages"> = values;
+    const { error } = await supabase
+      .from("support_messages")
+      // Cast required until Supabase's helpers expose an updated client with typed upsert generics.
+      .upsert(payload as never);
     if (error) {
       toast.error("Mesajınız iletilirken bir hata oluştu");
       return;

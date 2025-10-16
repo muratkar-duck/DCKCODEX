@@ -1,8 +1,11 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Tables } from "@/types";
 
-async function getProfile() {
+type UserProfile = Tables<"users">;
+
+async function getProfile(): Promise<UserProfile | null> {
   const supabase = createSupabaseServerClient();
   if (!supabase) {
     return null;
@@ -16,7 +19,7 @@ async function getProfile() {
   }
 
   const { data } = await supabase.from("users").select("*").eq("id", session.user.id).maybeSingle();
-  return data;
+  return (data as UserProfile | null) ?? null;
 }
 
 export default async function ProfilePage() {

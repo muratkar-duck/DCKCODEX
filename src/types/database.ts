@@ -444,6 +444,9 @@ export interface Database {
       notification_status: NotificationStatus;
       role: Roles;
     };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 }
 

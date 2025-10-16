@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database, TablesInsert } from "@/types";
 import "dotenv/config";
 
 const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -9,25 +8,25 @@ if (!serviceRole || !url) {
   throw new Error("Seed script çalıştırılmadan önce Supabase ortam değişkenleri ayarlanmalıdır.");
 }
 
-const supabase = createClient<Database>(url, serviceRole, {
+const supabase = createClient(url, serviceRole, {
   auth: { persistSession: false },
 });
 
 async function upsertUser(email: string, role: "writer" | "producer") {
-  const { data } = await supabase
+  const { data: existingUser } = await supabase
     .from("users")
-    .select("id")
+    .select("id, email, role")
     .eq("email", email)
     .maybeSingle();
 
-  if (data) {
-    const profile: TablesInsert<"users"> = {
-      id: data.id,
+  if (existingUser) {
+    const profile = {
+      id: (existingUser as { id: string }).id,
       email,
       role,
     };
     await supabase.from("users").upsert(profile);
-    return data.id;
+    return profile.id;
   }
 
   const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
@@ -41,12 +40,12 @@ async function upsertUser(email: string, role: "writer" | "producer") {
     throw authError ?? new Error("Kullanıcı oluşturulamadı");
   }
 
-  const profile: TablesInsert<"users"> = {
+  const newProfile = {
     id: authUser.user.id,
     email,
     role,
   };
-  await supabase.from("users").upsert(profile);
+  await supabase.from("users").upsert(newProfile);
   return authUser.user.id;
 }
 
@@ -54,7 +53,7 @@ async function main() {
   const writerId = await upsertUser("writer@ducktylo.test", "writer");
   const producerId = await upsertUser("producer@ducktylo.test", "producer");
 
-  const scripts: TablesInsert<"scripts">[] = [
+  const scripts = [
     {
       title: "Göbeklitepe Günlükleri",
       genre: "Drama",
@@ -79,7 +78,7 @@ async function main() {
     await supabase.from("scripts").upsert(script, { onConflict: "title" });
   }
 
-  const listings: TablesInsert<"producer_listings">[] = [
+  const listings = [
     {
       owner_id: producerId,
       title: "Festival İçin Duygusal Uzun Metraj Aranıyor",
@@ -104,8 +103,9 @@ async function main() {
     .from("scripts")
     .select("id, title")
     .eq("owner_id", writerId);
-  const gobeklitepe = scriptData?.find((item) => item.title === "Göbeklitepe Günlükleri");
-  const sahil = scriptData?.find((item) => item.title === "Sahildeki Düşler");
+  const typedScripts = (scriptData ?? []) as { id: string; title: string }[];
+  const gobeklitepe = typedScripts.find((item) => item.title === "Göbeklitepe Günlükleri");
+  const sahil = typedScripts.find((item) => item.title === "Sahildeki Düşler");
 
   if (gobeklitepe) {
     await supabase
@@ -140,16 +140,17 @@ async function main() {
       })
       .maybeSingle();
 
-    if (conversation) {
+    if (conversation && typeof (conversation as { id?: unknown }).id === "string") {
+      const conversationId = (conversation as { id: string }).id;
       await supabase.from("messages").upsert(
         [
           {
-            conversation_id: conversation.id,
+            conversation_id: conversationId,
             sender_id: producerId,
             body: "Merhaba, projenizi beğendik ve birlikte çalışmak istiyoruz!",
           },
           {
-            conversation_id: conversation.id,
+            conversation_id: conversationId,
             sender_id: writerId,
             body: "Harika! Detayları konuşmak için sabırsızlanıyorum.",
           },
