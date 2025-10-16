@@ -16,18 +16,14 @@ type ServerEnv = z.infer<typeof serverEnvSchema>;
 let cachedClientEnv: ClientEnv | null = null;
 let cachedServerEnv: ServerEnv | null = null;
 
-function readEnvValue(key: string) {
-  return process.env[key];
-}
-
 export function getOptionalClientEnv(): ClientEnv | null {
   if (cachedClientEnv) {
     return cachedClientEnv;
   }
 
   const result = clientEnvSchema.safeParse({
-    NEXT_PUBLIC_SUPABASE_URL: readEnvValue("NEXT_PUBLIC_SUPABASE_URL"),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: readEnvValue("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   });
 
   if (!result.success) {
@@ -44,10 +40,10 @@ export function getOptionalServerEnv(): ServerEnv | null {
   }
 
   const result = serverEnvSchema.safeParse({
-    NEXT_PUBLIC_SUPABASE_URL: readEnvValue("NEXT_PUBLIC_SUPABASE_URL"),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: readEnvValue("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    SUPABASE_SERVICE_ROLE_KEY: readEnvValue("SUPABASE_SERVICE_ROLE_KEY"),
-    SUPABASE_URL: readEnvValue("SUPABASE_URL"),
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_URL: process.env.SUPABASE_URL,
   });
 
   if (!result.success) {
