@@ -24,6 +24,7 @@ npm install
    - **NEXT_PUBLIC_SUPABASE_URL** – Project Settings → API → Project URL
    - **NEXT_PUBLIC_SUPABASE_ANON_KEY** – Project Settings → API → `anon` public API key
    - **SUPABASE_SERVICE_ROLE_KEY** *(opsiyonel)* – Seed scriptleri ve yönetici işlemleri için Project Settings → API → `service_role` secret
+   - **DEMO_USER_PASSWORD** *(opsiyonel)* – Seed scriptlerinin kullanacağı demo parola (varsayılan `123456`)
    - **SUPABASE_URL** – Çoğu durumda Project URL ile aynı değeri kullanın
 
 > Not: Seed scriptini çalıştırarak demo verileri yüklemek istiyorsanız servis rol anahtarının tanımlı olması gerekir.
@@ -60,10 +61,12 @@ Supabase servis rolü ile demo verileri yüklemek için:
 npm run seed:mvp
 ```
 
-Seed script'i aşağıdaki demo kullanıcıları oluşturur:
+Seed script'i aşağıdaki demo kullanıcıları oluşturur (parola varsayılan olarak `123456` veya `DEMO_USER_PASSWORD` değeridir):
 
-- `writer@ducktylo.test` / `password`
-- `producer@ducktylo.test` / `password`
+- `writer@ducktylo.test`
+- `producer@ducktylo.test`
+
+Elinizde halihazırda `public.users` tablosunda kayıtlı kullanıcılar varsa ve Supabase Auth ile senkronize etmek istiyorsanız `supabase/sync_auth_users.sql` dosyasını Supabase SQL editöründe çalıştırabilirsiniz. Script tüm kullanıcıların parolasını aynı demo parola ile günceller ve gerekli kimlik kayıtlarını oluşturur.
 
 Script ayrıca örnek senaryolar, ilanlar, bir satın alma kaydı ve demo mesajlaşma oturumu ekler.
 
