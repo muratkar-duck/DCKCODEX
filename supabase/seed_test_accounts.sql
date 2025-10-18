@@ -1,18 +1,13 @@
--- Seed writer and producer test accounts for Supabase Auth and public.users.
 -- Run this script in the Supabase SQL editor to create the desired users.
+-- Accounts use the credentials writer@ducktylo.test / password and producer@ducktylo.test / password.
 
 -- Ensure pgcrypto is available for password hashing.
 create extension if not exists pgcrypto;
 
 with input_users(role, email) as (
   values
-    ('writer', 'senarist1@ducktylo.com'),
-    ('writer', 'senarist2@ducktylo.com'),
-    ('writer', 'senarist3@ducktylo.com'),
-    ('writer', 'senarist4@ducktylo.com'),
-    ('writer', 'senarist5@ducktylo.com'),
-    ('producer', 'yapimci1@ducktylo.com'),
-    ('producer', 'yapimci2@ducktylo.com')
+    ('writer', 'writer@ducktylo.test'),
+    ('producer', 'producer@ducktylo.test')
 ),
 existing_auth as (
   select distinct on (lower(u.email))
@@ -36,7 +31,7 @@ prepared_auth as (
     'authenticated' as aud,
     'authenticated' as role,
     iu.email,
-    crypt('123456', gen_salt('bf')) as encrypted_password,
+    crypt('password', gen_salt('bf')) as encrypted_password,
     now() as email_confirmed_at,
     now() as created_at,
     now() as updated_at,
@@ -123,13 +118,8 @@ on conflict (provider, provider_id) do update
 
 with input_users(role, email) as (
   values
-    ('writer', 'senarist1@ducktylo.com'),
-    ('writer', 'senarist2@ducktylo.com'),
-    ('writer', 'senarist3@ducktylo.com'),
-    ('writer', 'senarist4@ducktylo.com'),
-    ('writer', 'senarist5@ducktylo.com'),
-    ('producer', 'yapimci1@ducktylo.com'),
-    ('producer', 'yapimci2@ducktylo.com')
+    ('writer', 'writer@ducktylo.test'),
+    ('producer', 'producer@ducktylo.test')
 ),
 timestamp_cte as (
   select now() as ts
