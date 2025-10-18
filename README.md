@@ -70,6 +70,11 @@ Elinizde halihazırda `public.users` tablosunda kayıtlı kullanıcılar varsa v
 
 Script ayrıca örnek senaryolar, ilanlar, bir satın alma kaydı ve demo mesajlaşma oturumu ekler.
 
+### Sorun giderme
+
+Giriş yaparken "Supabase Auth şeması okunamadı" mesajını görüyorsanız Supabase projenizin şemasını ve demo hesaplarını yeniden
+oluşturmanız gerekir. Adım adım yönergeler için [`docs/troubleshooting.md`](docs/troubleshooting.md) dosyasına göz atın.
+
 ## Dizim
 
 - `src/app`: Next.js App Router sayfaları

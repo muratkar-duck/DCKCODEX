@@ -16,7 +16,7 @@ const schema = z.object({
 
 function resolveSupabaseErrorMessage(message: string): string {
   if (message === "Database error querying schema") {
-    return "Supabase Auth şeması okunamadı. Lütfen Supabase projenizdeki şema ve seed scriptlerinin güncel olduğundan emin olun.";
+    return "Supabase Auth şeması okunamadı. Supabase SQL editöründen supabase/schema.sql ve supabase/seed_test_accounts.sql scriptlerini çalıştırıp tekrar deneyin.";
   }
 
   return message;
