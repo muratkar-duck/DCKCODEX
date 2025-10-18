@@ -1,3 +1,6 @@
+-- Ensure pgcrypto is available so gen_random_uuid() can be used in defaults
+create extension if not exists pgcrypto;
+
 -- Users table mirrors auth.users metadata
 create table if not exists public.users (
   id uuid primary key references auth.users(id) on delete cascade,
