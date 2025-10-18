@@ -14,6 +14,14 @@ const schema = z.object({
   password: z.string().min(6, "Parola en az 6 karakter"),
 });
 
+function resolveSupabaseErrorMessage(message: string): string {
+  if (message === "Database error querying schema") {
+    return "Supabase Auth şeması okunamadı. Lütfen Supabase projenizdeki şema ve seed scriptlerinin güncel olduğundan emin olun.";
+  }
+
+  return message;
+}
+
 export default function SignInPage() {
   const router = useRouter();
   const supabase = getBrowserClient();
@@ -31,7 +39,7 @@ export default function SignInPage() {
 
     const { error } = await supabase.auth.signInWithPassword(values);
     if (error) {
-      toast.error(error.message);
+      toast.error(resolveSupabaseErrorMessage(error.message));
       return;
     }
 

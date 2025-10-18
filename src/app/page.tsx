@@ -30,6 +30,8 @@ const trustSignals = [
   "GDPR uyumlu veri altyapısı",
 ];
 
+const demoPassword = process.env.DEMO_USER_PASSWORD ?? "123456";
+
 export default function HomePage() {
   return (
     <div className="bg-gradient-to-b from-krem to-white">
@@ -99,12 +101,12 @@ export default function HomePage() {
             <div className="rounded-xl border border-forest-600 bg-forest-800 px-4 py-3 text-left text-sm">
               <p className="font-semibold">Yazar</p>
               <p>writer@ducktylo.test</p>
-              <p>Şifre: password</p>
+              <p>Şifre: {demoPassword}</p>
             </div>
             <div className="rounded-xl border border-forest-600 bg-forest-800 px-4 py-3 text-left text-sm">
               <p className="font-semibold">Yapımcı</p>
               <p>producer@ducktylo.test</p>
-              <p>Şifre: password</p>
+              <p>Şifre: {demoPassword}</p>
             </div>
           </div>
         </div>
