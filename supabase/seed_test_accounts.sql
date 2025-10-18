@@ -32,7 +32,7 @@ prepared_auth as (
     'authenticated' as aud,
     'authenticated' as role,
     iu.email,
-    auth.hash_password('password') as encrypted_password,
+    auth.hash_password('password'::text) as encrypted_password,
     now() as email_confirmed_at,
     now() as created_at,
     now() as updated_at,
