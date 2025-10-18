@@ -3,6 +3,7 @@ import "dotenv/config";
 
 const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const demoPassword = process.env.DEMO_USER_PASSWORD ?? "123456";
 
 if (!serviceRole || !url) {
   throw new Error("Seed script çalıştırılmadan önce Supabase ortam değişkenleri ayarlanmalıdır.");
@@ -25,13 +26,18 @@ async function upsertUser(email: string, role: "writer" | "producer") {
       email,
       role,
     };
+    await supabase.auth.admin.updateUserById(profile.id, {
+      email,
+      password: demoPassword,
+      user_metadata: { role },
+    });
     await supabase.from("users").upsert(profile);
     return profile.id;
   }
 
   const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
     email,
-    password: "password",
+    password: demoPassword,
     email_confirm: true,
     user_metadata: { role },
   });
