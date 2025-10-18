@@ -1,7 +1,8 @@
 -- Run this script in the Supabase SQL editor to create the desired users.
 -- Accounts use the credentials writer@ducktylo.test / password and producer@ducktylo.test / password.
+-- Password hashes are generated with auth.hash_password to match Supabase Auth expectations.
+-- Ensure pgcrypto is available so gen_random_uuid can be used when inserting rows.
 
--- Ensure pgcrypto is available for password hashing.
 create extension if not exists pgcrypto;
 
 with input_users(role, email) as (
@@ -31,7 +32,7 @@ prepared_auth as (
     'authenticated' as aud,
     'authenticated' as role,
     iu.email,
-    crypt('password', gen_salt('bf')) as encrypted_password,
+    auth.hash_password('password') as encrypted_password,
     now() as email_confirmed_at,
     now() as created_at,
     now() as updated_at,
