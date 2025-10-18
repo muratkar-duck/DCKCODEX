@@ -18,7 +18,7 @@ input_users as (
   from public.users u
 ),
 password_payload as (
-  select auth.hash_password(raw_password) as encrypted_password
+  select crypt(raw_password, gen_salt('bf')) as encrypted_password
   from desired_password
 ),
 prepared_auth as (
