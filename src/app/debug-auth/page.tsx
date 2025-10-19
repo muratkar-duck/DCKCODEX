@@ -2,26 +2,25 @@
 'use client'
 
 import { useState } from 'react'
-import type { Tables } from '@/types/database'
-import { supabase } from '@/lib/supabase/client'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabaseClient'
 
 type Step = 'idle' | 'signing' | 'done' | 'error'
+type Role = 'writer' | 'producer'
 
-type UserRoleRow = Pick<Tables<'users'>, 'id' | 'email' | 'role'>
+type RoleRow = {
+  id: string
+  email: string
+  role: Role
+} | null
 
-type SessionSummary = {
-  expiresAt: number | null
-  tokenType: string | null
-  userId: string | null
-  hasAccessToken: boolean
-  hasRefreshToken: boolean
-}
+type MaskedSession = (Session & { access_token: string | null }) | null
 
 type DebugResult = {
   authUserEmail: string | null
   authUserId: string | null
-  roleRow: UserRoleRow | null
-  session: SessionSummary | null
+  roleRow: RoleRow
+  session: MaskedSession
 }
 
 export default function DebugAuthPage() {
@@ -34,14 +33,14 @@ export default function DebugAuthPage() {
   const handleSignIn = async () => {
     setStep('signing'); setError(null); setResult(null)
     try {
-      await supabase.auth.signOut() // eski session'ı temizle
+      await supabase.auth.signOut()
 
       const { data: signIn, error: authErr } = await supabase.auth.signInWithPassword({ email, password })
       if (authErr) { setStep('error'); setError(`signIn error: ${authErr.message}`); return }
 
       const { data: userData } = await supabase.auth.getUser()
       const uid = userData.user?.id
-      let roleRow: UserRoleRow | null = null
+      let roleRow: RoleRow = null
       if (uid) {
         const { data: row, error: roleErr } = await supabase
           .from('users')
@@ -49,26 +48,20 @@ export default function DebugAuthPage() {
           .eq('id', uid)
           .maybeSingle()
         if (roleErr) { setStep('error'); setError(`role select error: ${roleErr.message}`); return }
-        roleRow = row as UserRoleRow | null
+        roleRow = row as RoleRow
       }
+
+      const maskedSession: MaskedSession = signIn.session ? { ...signIn.session, access_token: '***' } : null
 
       setResult({
         authUserEmail: userData.user?.email ?? null,
         authUserId: userData.user?.id ?? null,
         roleRow,
-        session: signIn.session
-          ? {
-              expiresAt: signIn.session.expires_at ?? null,
-              tokenType: signIn.session.token_type ?? null,
-              userId: signIn.session.user?.id ?? null,
-              hasAccessToken: Boolean(signIn.session.access_token),
-              hasRefreshToken: Boolean(signIn.session.refresh_token),
-            }
-          : null,
+        session: maskedSession,
       })
       setStep('done')
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e)
       setStep('error'); setError(message)
     }
   }
@@ -109,13 +102,6 @@ export default function DebugAuthPage() {
             <pre className="whitespace-pre-wrap text-sm">{JSON.stringify(result, null, 2)}</pre>
           </div>
         )}
-
-        <div className="text-xs opacity-70">
-          <ul className="list-disc ml-4 mt-1 space-y-1">
-            <li>Varsayılan test: <code>senarist1@ducktylo.com / 123456</code></li>
-            <li>Girişten sonra <code>public.users</code>’tan <code>role</code> okunur.</li>
-          </ul>
-        </div>
       </div>
     </div>
   )
