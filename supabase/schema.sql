@@ -300,6 +300,14 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists set_timestamp on public.users;
+drop trigger if exists set_timestamp_scripts on public.scripts;
+drop trigger if exists set_timestamp_listings on public.producer_listings;
+drop trigger if exists set_timestamp_requests on public.requests;
+drop trigger if exists set_timestamp_applications on public.applications;
+drop trigger if exists set_timestamp_notifications on public.notification_queue;
+drop trigger if exists set_timestamp_conversations on public.conversations;
+
 create trigger set_timestamp before update on public.users for each row execute function public.handle_updated_at();
 create trigger set_timestamp_scripts before update on public.scripts for each row execute function public.handle_updated_at();
 create trigger set_timestamp_listings before update on public.producer_listings for each row execute function public.handle_updated_at();
@@ -321,37 +329,47 @@ alter table public.conversation_participants enable row level security;
 alter table public.messages enable row level security;
 alter table public.support_messages enable row level security;
 
+drop policy if exists "Users can manage their row" on public.users;
 create policy "Users can manage their row" on public.users
   for all using (auth.uid() = id) with check (auth.uid() = id);
 
+drop policy if exists "Writers manage own scripts" on public.scripts;
 create policy "Writers manage own scripts" on public.scripts
   for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
 
+drop policy if exists "Producers manage own listings" on public.producer_listings;
 create policy "Producers manage own listings" on public.producer_listings
   for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
 
+drop policy if exists "Users see relevant requests" on public.requests;
 create policy "Users see relevant requests" on public.requests
   for select using (
     auth.uid() = coalesce(producer_id, user_id)
   );
 
+drop policy if exists "Users manage own requests" on public.requests;
 create policy "Users manage own requests" on public.requests
   for all using (auth.uid() = coalesce(producer_id, user_id))
   with check (auth.uid() = coalesce(producer_id, user_id));
 
+drop policy if exists "Participants manage applications" on public.applications;
 create policy "Participants manage applications" on public.applications
   for all using (auth.uid() in (writer_id, producer_id))
   with check (auth.uid() in (writer_id, producer_id));
 
+drop policy if exists "Users view orders they own" on public.orders;
 create policy "Users view orders they own" on public.orders
   for select using (auth.uid() in (buyer_id));
 
+drop policy if exists "Producer interests" on public.interests;
 create policy "Producer interests" on public.interests
   for all using (auth.uid() = producer_id) with check (auth.uid() = producer_id);
 
+drop policy if exists "Notification recipients" on public.notification_queue;
 create policy "Notification recipients" on public.notification_queue
   for select using (auth.uid() = recipient_id);
 
+drop policy if exists "Conversation participants" on public.conversation_participants;
 create policy "Conversation participants" on public.conversation_participants
   for all using (
     exists(
@@ -361,6 +379,7 @@ create policy "Conversation participants" on public.conversation_participants
   )
   with check (participant_id = auth.uid());
 
+drop policy if exists "Messages restricted" on public.messages;
 create policy "Messages restricted" on public.messages
   for all using (
     exists(
@@ -369,6 +388,7 @@ create policy "Messages restricted" on public.messages
     )
   ) with check (sender_id = auth.uid());
 
+drop policy if exists "Support messages" on public.support_messages;
 create policy "Support messages" on public.support_messages
   for insert
   with check (true);
