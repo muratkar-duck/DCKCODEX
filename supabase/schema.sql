@@ -144,14 +144,24 @@ create table if not exists public.interests (
   primary key (producer_id, script_id)
 );
 
-create type notification_status as enum ('pending','processing','sent','failed');
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_type
+    where typname = 'notification_status'
+      and typnamespace = 'public'::regnamespace
+  ) then
+    create type public.notification_status as enum ('pending','processing','sent','failed');
+  end if;
+end$$;
 
 create table if not exists public.notification_queue (
   id uuid primary key default gen_random_uuid(),
   recipient_id uuid not null references public.users(id) on delete cascade,
   template text not null,
   payload jsonb,
-  status notification_status not null default 'pending',
+  status public.notification_status not null default 'pending',
   error text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

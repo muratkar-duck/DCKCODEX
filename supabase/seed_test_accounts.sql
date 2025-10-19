@@ -7,7 +7,7 @@
 create extension if not exists "pgcrypto";
 
 with data as (
-  select *
+  select value as entry
   from jsonb_array_elements(
     '[
       {"email":"senarist1@ducktylo.com","role":"writer"},
@@ -18,13 +18,13 @@ with data as (
       {"email":"yapimci1@ducktylo.com","role":"producer"},
       {"email":"yapimci2@ducktylo.com","role":"producer"}
     ]'::jsonb
-  ) as j
+  )
 ),
 prepared as (
   select
-    (j->>'email')::text as email,
-    lower((j->>'email')::text) as email_lower,
-    (j->>'role')::text as role
+    (entry->>'email')::text as email,
+    lower((entry->>'email')::text) as email_lower,
+    (entry->>'role')::text as role
   from data
 ),
 project_instance as (
