@@ -1,16 +1,74 @@
--- Ensure pgcrypto is available so gen_random_uuid() can be used in defaults
+-- Required extensions for UUID handling and crypt functions
+create extension if not exists "uuid-ossp";
 create extension if not exists pgcrypto;
+
+-- User role enum (writer / producer)
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_type
+    where typname = 'user_role'
+      and typnamespace = 'public'::regnamespace
+  ) then
+    create type public.user_role as enum ('writer', 'producer');
+  end if;
+end$$;
+
+-- Drop legacy check constraints that conflict with the enum if they exist
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.users'::regclass
+      and conname = 'users_role_check'
+  ) then
+    alter table public.users drop constraint users_role_check;
+  end if;
+exception when undefined_table then
+  -- Table does not exist yet; nothing to drop.
+  null;
+end$$;
 
 -- Users table mirrors auth.users metadata
 create table if not exists public.users (
   id uuid primary key references auth.users(id) on delete cascade,
   email text not null unique,
-  role text not null check (role in ('writer', 'producer')),
+  role public.user_role not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+-- Ensure legacy installs convert the role column to the enum type
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'users'
+      and column_name = 'role'
+      and udt_name <> 'user_role'
+  ) then
+    alter table public.users
+      alter column role type public.user_role using role::public.user_role;
+  end if;
+exception when undefined_table then
+  null;
+end$$;
+
+alter table if exists public.users
+  alter column email set not null,
+  alter column role set not null;
+
+-- Login / profile lookups require relaxed RLS in the demo environment
+alter table if exists public.users disable row level security;
+
+create index if not exists idx_users_email on public.users (email);
 create index if not exists users_role_idx on public.users(role);
+
+comment on table public.users is 'App profile rows mirrored by auth.users (1-1). DEMO: RLS disabled.';
 
 create table if not exists public.scripts (
   id uuid primary key default gen_random_uuid(),
