@@ -65,6 +65,9 @@ Seed script'i aşağıdaki demo kullanıcıları oluşturur (parola varsayılan 
 
 - `writer@ducktylo.test`
 - `producer@ducktylo.test`
+- `senarist1@ducktylo.test` – `senarist5@ducktylo.test`
+- `yapimci1@ducktylo.test`
+- `yapimci2@ducktylo.test`
 
 Elinizde halihazırda `public.users` tablosunda kayıtlı kullanıcılar varsa ve Supabase Auth ile senkronize etmek istiyorsanız `supabase/sync_auth_users.sql` dosyasını Supabase SQL editöründe çalıştırabilirsiniz. Script tüm kullanıcıların parolasını aynı demo parola ile günceller ve gerekli kimlik kayıtlarını oluşturur.
 

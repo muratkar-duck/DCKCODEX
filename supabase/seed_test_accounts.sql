@@ -10,13 +10,13 @@ with data as (
   select value as entry
   from jsonb_array_elements(
     '[
-      {"email":"senarist1@ducktylo.com","role":"writer"},
-      {"email":"senarist2@ducktylo.com","role":"writer"},
-      {"email":"senarist3@ducktylo.com","role":"writer"},
-      {"email":"senarist4@ducktylo.com","role":"writer"},
-      {"email":"senarist5@ducktylo.com","role":"writer"},
-      {"email":"yapimci1@ducktylo.com","role":"producer"},
-      {"email":"yapimci2@ducktylo.com","role":"producer"}
+      {"email":"senarist1@ducktylo.test","role":"writer"},
+      {"email":"senarist2@ducktylo.test","role":"writer"},
+      {"email":"senarist3@ducktylo.test","role":"writer"},
+      {"email":"senarist4@ducktylo.test","role":"writer"},
+      {"email":"senarist5@ducktylo.test","role":"writer"},
+      {"email":"yapimci1@ducktylo.test","role":"producer"},
+      {"email":"yapimci2@ducktylo.test","role":"producer"}
     ]'::jsonb
   )
 ),
