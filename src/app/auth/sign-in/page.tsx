@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getBrowserClient } from "@/lib/supabase/client";
 import { SUPABASE_CONFIG_MISSING_MESSAGE } from "@/lib/supabase/messages";
 import toast from "react-hot-toast";
+import type { Roles } from "@/types";
 
 const schema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
@@ -37,13 +38,24 @@ export default function SignInPage() {
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword(values);
+    const { data, error } = await supabase.auth.signInWithPassword(values);
     if (error) {
       toast.error(resolveSupabaseErrorMessage(error.message));
       return;
     }
 
+    const role = (data.user?.user_metadata?.role as Roles | undefined) ?? null;
     toast.success("Hoş geldiniz!");
+    if (role === "writer") {
+      router.push("/dashboard/writer");
+      return;
+    }
+
+    if (role === "producer") {
+      router.push("/dashboard/producer");
+      return;
+    }
+
     router.push("/browse");
   }
 

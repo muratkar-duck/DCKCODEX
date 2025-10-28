@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
 import { useAuth } from "@/components/auth/auth-context";
 import { UserMenu } from "@/components/layout/user-menu";
+import type { Roles } from "@/types";
 
 const guestLinks = [
   { href: "/", label: "Ana Sayfa" },
@@ -17,7 +18,7 @@ const guestLinks = [
   { href: "/contact", label: "İletişim" },
 ];
 
-const roleLinks: Record<string, { href: string; label: string }[]> = {
+const roleLinks: Record<Roles, { href: string; label: string }[]> = {
   writer: [
     { href: "/browse", label: "Keşfet" },
     { href: "/dashboard/writer", label: "Panel" },
@@ -31,13 +32,11 @@ const roleLinks: Record<string, { href: string; label: string }[]> = {
 };
 
 export function AppHeader() {
-  const { session, profile } = useAuth();
+  const { session, role } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const currentLinks = session?.user
-    ? roleLinks[profile?.role ?? (session.user.user_metadata.role as string) ?? "producer"] ?? guestLinks
-    : guestLinks;
+  const currentLinks = session?.user && role ? roleLinks[role] ?? guestLinks : guestLinks;
 
   return (
     <header

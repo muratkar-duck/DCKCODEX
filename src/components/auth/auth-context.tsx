@@ -1,8 +1,8 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import type { Tables } from "@/types";
+import type { Roles, Tables } from "@/types";
 import { useSupabase } from "@/lib/supabase/client";
 
 type UserProfile = Tables<"users">;
@@ -10,6 +10,7 @@ type UserProfile = Tables<"users">;
 type AuthContextValue = {
   session: Session | null;
   profile: UserProfile | null;
+  role: Roles | null;
   refreshProfile: () => Promise<void>;
 };
 
@@ -29,6 +30,10 @@ export function AuthProvider({
   const supabase = useSupabase();
   const [session, setSession] = useState<Session | null>(initialSession);
   const [profile, setProfile] = useState<UserProfile | null>(initialProfile);
+  const role = useMemo<Roles | null>(() => {
+    const metadataRole = session?.user?.user_metadata?.role as Roles | undefined;
+    return profile?.role ?? metadataRole ?? null;
+  }, [profile?.role, session?.user?.user_metadata?.role]);
 
   useEffect(() => {
     if (!supabase) {
@@ -68,11 +73,15 @@ export function AuthProvider({
     }
   }, [session, supabase]);
 
-  const value: AuthContextValue = {
-    session,
-    profile,
-    refreshProfile,
-  };
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      session,
+      profile,
+      role,
+      refreshProfile,
+    }),
+    [profile, refreshProfile, role, session]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

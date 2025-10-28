@@ -10,7 +10,7 @@ export type AuthGuardProps = {
 };
 
 export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
-  const { session, profile } = useAuth();
+  const { session, role } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,20 +20,18 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     }
 
     if (allowedRoles && allowedRoles.length > 0) {
-      const role = profile?.role ?? (session.user.user_metadata.role as string) ?? "producer";
-      if (!allowedRoles.includes(role as "writer" | "producer")) {
+      if (!role || !allowedRoles.includes(role)) {
         router.replace("/browse");
       }
     }
-  }, [allowedRoles, profile?.role, router, session?.user]);
+  }, [allowedRoles, role, router, session?.user]);
 
   if (!session?.user) {
     return null;
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
-    const role = profile?.role ?? (session.user.user_metadata.role as string) ?? "producer";
-    if (!allowedRoles.includes(role as "writer" | "producer")) {
+    if (!role || !allowedRoles.includes(role)) {
       return null;
     }
   }
