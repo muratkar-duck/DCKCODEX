@@ -14,7 +14,7 @@ type UserMenuProps = {
 };
 
 export function UserMenu({ orientation = "horizontal" }: UserMenuProps) {
-  const { session, profile } = useAuth();
+  const { session, role } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -34,17 +34,19 @@ export function UserMenu({ orientation = "horizontal" }: UserMenuProps) {
     );
   }
 
-  const role = profile?.role ?? (session.user.user_metadata.role as string) ?? "producer";
   const quickLinks =
     role === "writer"
       ? [
           { href: "/dashboard/writer/scripts", label: "Senaryolarım" },
           { href: "/dashboard/writer/applications", label: "Başvurularım" },
         ]
-      : [
+      : role === "producer"
+      ? [
           { href: "/dashboard/producer/listings", label: "İlanlarım" },
           { href: "/dashboard/producer/applications", label: "Başvurular" },
-        ];
+        ]
+      : [];
+  const roleLabel = role === "writer" ? "Senarist" : role === "producer" ? "Yapımcı" : "Hesap";
 
   async function handleSignOut() {
     const supabase = getBrowserClient();
@@ -66,7 +68,7 @@ export function UserMenu({ orientation = "horizontal" }: UserMenuProps) {
         </span>
         <span className="hidden text-left text-sm font-medium md:flex md:flex-col">
           <span>{session.user.email}</span>
-          <span className="text-xs text-forest-600">{role === "writer" ? "Yazar" : "Yapımcı"}</span>
+          <span className="text-xs text-forest-600">{roleLabel}</span>
         </span>
         <ChevronDown className="h-4 w-4" />
       </Button>
@@ -76,19 +78,21 @@ export function UserMenu({ orientation = "horizontal" }: UserMenuProps) {
           role="menu"
           className="absolute right-0 mt-2 w-64 rounded-xl border border-forest-100 bg-white p-3 text-sm shadow-xl"
         >
-          <div className="mb-3 flex flex-col gap-1">
-            <span className="font-semibold text-forest-900">Hızlı Erişim</span>
-            {quickLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-md px-2 py-1 text-forest-700 hover:bg-forest-50"
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
+          {quickLinks.length > 0 ? (
+            <div className="mb-3 flex flex-col gap-1">
+              <span className="font-semibold text-forest-900">Hızlı Erişim</span>
+              {quickLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-md px-2 py-1 text-forest-700 hover:bg-forest-50"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          ) : null}
           <div className="flex flex-col gap-1">
             <Link
               href="/profile"

@@ -335,11 +335,33 @@ create policy "Users can manage their row" on public.users
 
 drop policy if exists "Writers manage own scripts" on public.scripts;
 create policy "Writers manage own scripts" on public.scripts
-  for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+  for all using (
+    auth.uid() = owner_id
+    and exists (
+      select 1 from public.users u where u.id = auth.uid() and u.role = 'writer'
+    )
+  )
+  with check (
+    auth.uid() = owner_id
+    and exists (
+      select 1 from public.users u where u.id = auth.uid() and u.role = 'writer'
+    )
+  );
 
 drop policy if exists "Producers manage own listings" on public.producer_listings;
 create policy "Producers manage own listings" on public.producer_listings
-  for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+  for all using (
+    auth.uid() = owner_id
+    and exists (
+      select 1 from public.users u where u.id = auth.uid() and u.role = 'producer'
+    )
+  )
+  with check (
+    auth.uid() = owner_id
+    and exists (
+      select 1 from public.users u where u.id = auth.uid() and u.role = 'producer'
+    )
+  );
 
 drop policy if exists "Users see relevant requests" on public.requests;
 create policy "Users see relevant requests" on public.requests
@@ -363,7 +385,18 @@ create policy "Users view orders they own" on public.orders
 
 drop policy if exists "Producer interests" on public.interests;
 create policy "Producer interests" on public.interests
-  for all using (auth.uid() = producer_id) with check (auth.uid() = producer_id);
+  for all using (
+    auth.uid() = producer_id
+    and exists (
+      select 1 from public.users u where u.id = auth.uid() and u.role = 'producer'
+    )
+  )
+  with check (
+    auth.uid() = producer_id
+    and exists (
+      select 1 from public.users u where u.id = auth.uid() and u.role = 'producer'
+    )
+  );
 
 drop policy if exists "Notification recipients" on public.notification_queue;
 create policy "Notification recipients" on public.notification_queue
