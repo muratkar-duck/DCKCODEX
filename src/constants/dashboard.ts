@@ -13,12 +13,18 @@ export const producerNavItems = [
 
 export const writerNavItems = [
   { href: "/dashboard/writer", label: "Özet" },
+  { href: "/dashboard/writer/profile", label: "Profil" },
   { href: "/dashboard/writer/scripts", label: "Senaryolar" },
+  { href: "/dashboard/writer/evaluations", label: "Değerlendirmeler" },
+  { href: "/dashboard/writer/toplists", label: "Top Listeler" },
+  { href: "/dashboard/writer/featured", label: "Featured" },
   { href: "/dashboard/writer/stats", label: "İstatistikler" },
+  { href: "/dashboard/writer/programs", label: "Programlar" },
   { href: "/dashboard/writer/applications", label: "Başvurular" },
   { href: "/dashboard/writer/listings", label: "İlanlar" },
   { href: "/dashboard/writer/requests", label: "Talepler" },
   { href: "/dashboard/writer/messages", label: "Mesajlar" },
   { href: "/dashboard/writer/notifications", label: "Bildirimler" },
+  { href: "/dashboard/writer/success", label: "Başarılar" },
   { href: "/dashboard/writer/billing", label: "Faturalandırma" },
 ];
